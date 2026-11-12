@@ -43,6 +43,54 @@ st.write(
 
 st.divider()
 
+EXAMPLES = {
+    "Normal operation (ID 1)": {
+        "air_temperature": 298.1,
+        "process_temperature": 308.6,
+        "rotational_speed": 1551,
+        "torque": 42.8,
+        "tool_wear": 0,
+        "machine_type": "M"
+    },
+    "Recorded failure (ID 51)": {
+        "air_temperature": 298.9,
+        "process_temperature": 309.1,
+        "rotational_speed": 2861,
+        "torque": 4.6,
+        "tool_wear": 143,
+        "machine_type": "L"
+    }
+}
+
+
+def load_example():
+    example = st.session_state.example
+    if example is not None:
+        st.session_state.update(EXAMPLES[example])
+        st.session_state.example = None
+
+
+for key, default in {
+    "air_temperature": 298.1,
+    "process_temperature": 308.6,
+    "rotational_speed": 1500,
+    "torque": 40.0,
+    "tool_wear": 100,
+    "machine_type": "H"
+}.items():
+    st.session_state.setdefault(key, default)
+
+
+with st.columns(2)[0]:
+    st.selectbox(
+        "Load example",
+        list(EXAMPLES),
+        index=None,
+        placeholder="Choose an example",
+        key="example",
+        on_change=load_example
+    )
+
 st.subheader("Machine Parameters")
 
 col1, col2 = st.columns(2)
@@ -54,21 +102,21 @@ with col1:
         "Air Temperature [K]",
         min_value=250.0,
         max_value=350.0,
-        value=298.1
+        key="air_temperature"
     )
 
     process_temperature = st.number_input(
         "Process Temperature [K]",
         min_value=250.0,
         max_value=350.0,
-        value=308.6
+        key="process_temperature"
     )
 
     rotational_speed = st.number_input(
         "Rotational Speed [rpm]",
         min_value=0,
         max_value=5000,
-        value=1500
+        key="rotational_speed"
     )
 
 
@@ -78,19 +126,20 @@ with col2:
         "Torque [Nm]",
         min_value=0.0,
         max_value=100.0,
-        value=40.0
+        key="torque"
     )
 
     tool_wear = st.number_input(
         "Tool Wear [min]",
         min_value=0,
         max_value=300,
-        value=100
+        key="tool_wear"
     )
 
     machine_type = st.selectbox(
         "Machine Type",
-        ["H", "L", "M"]
+        ["H", "L", "M"],
+        key="machine_type"
     )
 
 
