@@ -16,6 +16,35 @@ random_forest = joblib.load("random_forest.pkl")
 xgb_model = joblib.load("xgboost.pkl")
 scaler = joblib.load("scaler.pkl")
 
+MODELS = {
+    "Logistic Regression": logistic_model,
+    "Decision Tree": decision_tree,
+    "Random Forest": random_forest,
+    "XGBoost": xgb_model
+}
+
+
+def predict_failure(model_name, input_data):
+    if model_name == "Logistic Regression":
+        model_input = scaler.transform(input_data)
+    elif model_name == "XGBoost":
+        model_input = input_data.copy()
+        model_input.columns = [
+            "air_temperature",
+            "process_temperature",
+            "rotational_speed",
+            "torque",
+            "tool_wear",
+            "type_H",
+            "type_L",
+            "type_M"
+        ]
+    else:
+        model_input = input_data
+
+    model = MODELS[model_name]
+    return model.predict(model_input)[0], model.predict_proba(model_input)[0][1]
+
 
 st.sidebar.title("⚙️ Predictive Maintenance")
 
@@ -25,12 +54,7 @@ st.sidebar.write(
 
 model_name = st.sidebar.selectbox(
     "Choose ML Model",
-    [
-        "Logistic Regression",
-        "Decision Tree",
-        "Random Forest",
-        "XGBoost"
-    ]
+    list(MODELS)
 )
 
 
@@ -146,10 +170,18 @@ with col2:
 st.divider()
 
 
-if st.button(
+predict_clicked = st.button(
     "🔍 Predict Machine Failure",
     use_container_width=True
-):
+)
+
+compare_clicked = st.button(
+    "Compare models",
+    use_container_width=True
+)
+
+
+if predict_clicked or compare_clicked:
 
     input_data = pd.DataFrame({
         "Air temperature [K]": [air_temperature],
@@ -163,63 +195,28 @@ if st.button(
     })
 
 
-    if model_name == "Logistic Regression":
+if compare_clicked:
+    results = []
+    for name in MODELS:
+        prediction, probability = predict_failure(name, input_data)
+        results.append({
+            "Model": name,
+            "Prediction": "Failure" if prediction == 1 else "Normal operation",
+            "Failure probability (%)": probability * 100
+        })
 
-        input_scaled = scaler.transform(input_data)
-
-        prediction = logistic_model.predict(
-            input_scaled
-        )[0]
-
-        probability = logistic_model.predict_proba(
-            input_scaled
-        )[0][1]
-
-
-    elif model_name == "Decision Tree":
-
-        prediction = decision_tree.predict(
-            input_data
-        )[0]
-
-        probability = decision_tree.predict_proba(
-            input_data
-        )[0][1]
+    st.dataframe(
+        pd.DataFrame(results),
+        hide_index=True,
+        width="stretch",
+        column_config={
+            "Failure probability (%)": st.column_config.NumberColumn(format="%.2f")
+        }
+    )
 
 
-    elif model_name == "Random Forest":
-
-        prediction = random_forest.predict(
-            input_data
-        )[0]
-
-        probability = random_forest.predict_proba(
-            input_data
-        )[0][1]
-
-
-    else:
-
-        input_xgb = input_data.copy()
-
-        input_xgb.columns = [
-            "air_temperature",
-            "process_temperature",
-            "rotational_speed",
-            "torque",
-            "tool_wear",
-            "type_H",
-            "type_L",
-            "type_M"
-        ]
-
-        prediction = xgb_model.predict(
-            input_xgb
-        )[0]
-
-        probability = xgb_model.predict_proba(
-            input_xgb
-        )[0][1]
+if predict_clicked:
+    prediction, probability = predict_failure(model_name, input_data)
 
 
     st.divider()
