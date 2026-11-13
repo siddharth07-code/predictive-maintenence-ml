@@ -167,6 +167,15 @@ with col2:
     )
 
 
+current_inputs = (
+    air_temperature, process_temperature, rotational_speed,
+    torque, tool_wear, machine_type
+)
+if st.session_state.get("comparison_inputs") != current_inputs:
+    st.session_state.pop("comparison_results", None)
+    st.session_state.pop("comparison_inputs", None)
+
+
 st.divider()
 
 
@@ -205,13 +214,26 @@ if compare_clicked:
             "Failure probability (%)": probability * 100
         })
 
+    st.session_state.comparison_results = pd.DataFrame(results)
+    st.session_state.comparison_inputs = current_inputs
+
+
+if "comparison_results" in st.session_state:
+    comparison = st.session_state.comparison_results
     st.dataframe(
-        pd.DataFrame(results),
+        comparison,
         hide_index=True,
         width="stretch",
         column_config={
             "Failure probability (%)": st.column_config.NumberColumn(format="%.2f")
         }
+    )
+    st.download_button(
+        "Download comparison CSV",
+        data=comparison.to_csv(index=False, float_format="%.2f"),
+        file_name="model-comparison.csv",
+        mime="text/csv",
+        on_click="ignore"
     )
 
 
