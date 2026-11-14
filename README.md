@@ -290,6 +290,17 @@ http://localhost:8501
 
 ---
 
+## Try the demo
+
+After completing the Installation steps above:
+
+1. From the repository root, run `streamlit run app.py` and open http://localhost:8501.
+2. Under **Load example**, select **Recorded failure (ID 51)**.
+3. Click **Compare models** to view predictions from all four models.
+4. Click **Download comparison CSV** below the table to save `model-comparison.csv`.
+
+---
+
 ## 🔬 Future Improvements
 
 Possible future extensions include:
