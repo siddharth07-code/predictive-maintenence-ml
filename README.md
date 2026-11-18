@@ -288,6 +288,16 @@ The application will be available at:
 http://localhost:8501
 ```
 
+### Run the tests
+
+After completing Installation above with Python 3.13 (matching CI), run from the repository root in the activated environment:
+
+```bash
+python -m unittest discover -s tests -v
+```
+
+Changing a machine input invalidates the comparison table and CSV download until you run the comparison again.
+
 ---
 
 ## Try the demo
