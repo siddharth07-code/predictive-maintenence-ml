@@ -1,4 +1,5 @@
 from contextlib import chdir
+import csv
 from pathlib import Path
 import unittest
 
@@ -27,6 +28,32 @@ class ModelComparisonTest(unittest.TestCase):
         self.assertEqual(downloads[0].proto.label, "Download comparison CSV")
         self.assertFalse(downloads[0].proto.disabled)
         self.assertTrue(downloads[0].proto.url)
+
+    def test_normal_operation_preset_matches_dataset_row_one(self):
+        with (REPO_ROOT / "data" / "ai4i2020.csv").open(
+            encoding="utf-8-sig", newline=""
+        ) as dataset:
+            row = next(row for row in csv.DictReader(dataset) if row["UDI"] == "1")
+
+        with chdir(REPO_ROOT):
+            app = AppTest.from_file(
+                str(REPO_ROOT / "app.py"), default_timeout=30
+            ).run()
+            self.assertEqual(len(app.exception), 0)
+
+            app.selectbox(key="example").select("Normal operation (ID 1)").run()
+            self.assertEqual(len(app.exception), 0)
+
+            for key, column in {
+                "air_temperature": "Air temperature [K]",
+                "process_temperature": "Process temperature [K]",
+                "rotational_speed": "Rotational speed [rpm]",
+                "torque": "Torque [Nm]",
+                "tool_wear": "Tool wear [min]",
+            }.items():
+                with self.subTest(input=key):
+                    self.assertEqual(app.number_input(key=key).value, float(row[column]))
+            self.assertEqual(app.selectbox(key="machine_type").value, row["Type"])
 
     def test_torque_change_requires_fresh_comparison(self):
         with chdir(REPO_ROOT):
