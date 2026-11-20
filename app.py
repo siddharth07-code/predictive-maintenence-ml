@@ -228,9 +228,25 @@ if "comparison_results" in st.session_state:
             "Failure probability (%)": st.column_config.NumberColumn(format="%.2f")
         }
     )
+    export = comparison.copy()
+    export["Failure probability (%)"] = export["Failure probability (%)"].map(
+        "{:.2f}".format
+    )
+    for column, value in zip(
+        [
+            "Air temperature [K]",
+            "Process temperature [K]",
+            "Rotational speed [rpm]",
+            "Torque [Nm]",
+            "Tool wear [min]",
+            "Machine Type"
+        ],
+        st.session_state.comparison_inputs
+    ):
+        export[column] = value
     st.download_button(
         "Download comparison CSV",
-        data=comparison.to_csv(index=False, float_format="%.2f"),
+        data=export.to_csv(index=False),
         file_name="model-comparison.csv",
         mime="text/csv",
         on_click="ignore"
