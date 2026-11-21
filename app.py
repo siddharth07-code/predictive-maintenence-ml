@@ -1,3 +1,5 @@
+from datetime import datetime, timezone
+
 import streamlit as st
 import pandas as pd
 import joblib
@@ -174,6 +176,7 @@ current_inputs = (
 if st.session_state.get("comparison_inputs") != current_inputs:
     st.session_state.pop("comparison_results", None)
     st.session_state.pop("comparison_inputs", None)
+    st.session_state.pop("comparison_filename", None)
 
 
 st.divider()
@@ -205,6 +208,9 @@ if predict_clicked or compare_clicked:
 
 
 if compare_clicked:
+    comparison_filename = datetime.now(timezone.utc).strftime(
+        "model-comparison-%Y%m%d-%H%M%S-utc.csv"
+    )
     results = []
     for name in MODELS:
         prediction, probability = predict_failure(name, input_data)
@@ -216,6 +222,7 @@ if compare_clicked:
 
     st.session_state.comparison_results = pd.DataFrame(results)
     st.session_state.comparison_inputs = current_inputs
+    st.session_state.comparison_filename = comparison_filename
 
 
 if "comparison_results" in st.session_state:
@@ -247,7 +254,7 @@ if "comparison_results" in st.session_state:
     st.download_button(
         "Download comparison CSV",
         data=export.to_csv(index=False),
-        file_name="model-comparison.csv",
+        file_name=st.session_state.comparison_filename,
         mime="text/csv",
         on_click="ignore"
     )
