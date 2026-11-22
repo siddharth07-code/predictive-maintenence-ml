@@ -93,6 +93,7 @@ def load_example():
     example = st.session_state.example
     if example is not None:
         st.session_state.update(EXAMPLES[example])
+        st.session_state.selected_example = example
         st.session_state.example = None
 
 
@@ -227,6 +228,12 @@ if compare_clicked:
 
 if "comparison_results" in st.session_state:
     comparison = st.session_state.comparison_results
+    selected_example = st.session_state.get("selected_example")
+    if selected_example in EXAMPLES and all(
+        st.session_state[key] == value
+        for key, value in EXAMPLES[selected_example].items()
+    ):
+        st.caption(f"Recorded outcome: {selected_example}")
     st.dataframe(
         comparison,
         hide_index=True,
