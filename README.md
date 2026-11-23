@@ -116,12 +116,12 @@ A gradient-boosting algorithm designed for high-performance classification on st
 
 The initial evaluation produced the following results:
 
-| Model | Accuracy | Failure Recall | F1 Score |
-|---|---:|---:|---:|
-| Logistic Regression | 82.50% | 82.35% | 0.242 |
-| Decision Tree | 93.65% | **85.29%** | 0.477 |
-| Random Forest | **97.90%** | 63.24% | 0.672 |
-| XGBoost | **~99%** | 69.00% | **0.790** |
+| Model | Accuracy | Failure Recall | F1 Score | False positives | False negatives |
+|---|---:|---:|---:|---:|---:|
+| Logistic Regression | 82.50% | 82.35% | 0.242 | 338 | 12 |
+| Decision Tree | 93.65% | **85.29%** | 0.477 | 117 | 10 |
+| Random Forest | 97.90% | 63.24% | 0.672 | 17 | 25 |
+| XGBoost | **98.65%** | 69.12% | **0.777** | 6 | 21 |
 
 ### Important observation
 
@@ -129,7 +129,7 @@ Accuracy alone is not sufficient for predictive maintenance because machine fail
 
 Therefore, **precision, recall and F1-score for the failure class are also considered**.
 
-The Decision Tree achieved the highest failure recall in the initial comparison, while XGBoost achieved the strongest overall F1-score and accuracy.
+The Decision Tree misses fewer failures than XGBoost but raises more false alarms.
 
 ---
 
