@@ -97,26 +97,42 @@ def load_example():
         st.session_state.example = None
 
 
-for key, default in {
+DEFAULT_INPUTS = {
     "air_temperature": 298.1,
     "process_temperature": 308.6,
     "rotational_speed": 1500,
     "torque": 40.0,
     "tool_wear": 100,
     "machine_type": "H"
-}.items():
+}
+
+
+def reset_inputs():
+    st.session_state.update(DEFAULT_INPUTS)
+    st.session_state.example = None
+    st.session_state.pop("selected_example", None)
+    st.session_state.pop("comparison_results", None)
+    st.session_state.pop("comparison_inputs", None)
+    st.session_state.pop("comparison_filename", None)
+
+
+for key, default in DEFAULT_INPUTS.items():
     st.session_state.setdefault(key, default)
 
 
 with st.columns(2)[0]:
-    st.selectbox(
-        "Load example",
-        list(EXAMPLES),
-        index=None,
-        placeholder="Choose an example",
-        key="example",
-        on_change=load_example
-    )
+    example_col, reset_col = st.columns([2, 1], vertical_alignment="bottom")
+    with example_col:
+        st.selectbox(
+            "Load example",
+            list(EXAMPLES),
+            index=None,
+            placeholder="Choose an example",
+            key="example",
+            on_change=load_example
+        )
+    with reset_col:
+        st.button("Reset inputs", on_click=reset_inputs)
 
 st.subheader("Machine Parameters")
 
