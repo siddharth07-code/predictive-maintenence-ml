@@ -90,6 +90,8 @@ The target variable is:
 
 The failure-specific columns were excluded from the initial predictive model to reduce the possibility of target leakage.
 
+Run `python failure_mode_counts.py` to print each failure mode's positive count and prevalence, including RNF separately, and the number of rows with two or more active labels.
+
 ---
 
 ## 🤖 Machine Learning Models
