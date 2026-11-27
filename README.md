@@ -92,7 +92,7 @@ The failure-specific columns were excluded from the initial predictive model to 
 
 Run `python failure_mode_counts.py` to print each failure mode's positive count and prevalence, including RNF separately, and the number of rows with two or more active labels.
 
-Run `python failure_mode_benchmark.py` to benchmark the most common of TWF, HDF, PWF, and OSF with logistic regression and compare test average precision with test prevalence.
+Run `python failure_mode_benchmark.py` to compare fixed Logistic Regression and XGBoost models on the most common of TWF, HDF, PWF, and OSF using held-out average precision and test prevalence as a reference.
 
 ---
 

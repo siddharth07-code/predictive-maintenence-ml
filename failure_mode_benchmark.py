@@ -1,12 +1,14 @@
 from pathlib import Path
 
 import pandas as pd
+from sklearn.base import clone
 from sklearn.compose import ColumnTransformer
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import average_precision_score
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
+from xgboost import XGBClassifier
 
 
 FAILURE_MODES = ["TWF", "HDF", "PWF", "OSF"]
@@ -34,22 +36,30 @@ def main():
         ("numeric", StandardScaler(), NUMERIC_FEATURES),
         ("type", OneHotEncoder(handle_unknown="ignore"), ["Type"]),
     ])
-    model = Pipeline([
-        ("preprocessing", preprocessing),
-        ("classifier", LogisticRegression(
+    models = {
+        "Logistic Regression": LogisticRegression(
             max_iter=1000, class_weight="balanced", random_state=42
-        )),
-    ])
-    model.fit(X_train, y_train)
-    scores = model.predict_proba(X_test)[:, 1]
-    average_precision = average_precision_score(y_test, scores)
+        ),
+        "XGBoost": XGBClassifier(
+            n_estimators=200, max_depth=5, learning_rate=0.05,
+            random_state=42, eval_metric="logloss", tree_method="hist", n_jobs=1
+        ),
+    }
     prevalence = float(y_test.mean())
 
     print(f"Target: {target} ({int(counts[target])} positives overall)")
     print("Split: stratified 80/20, random_state=42")
     print(f"Train positives: {int(y_train.sum())}/{len(y_train)}")
     print(f"Test positives: {int(y_test.sum())}/{len(y_test)}")
-    print(f"Test average precision: {average_precision:.6f}")
+    for name, classifier in models.items():
+        model = Pipeline([
+            ("preprocessing", clone(preprocessing)),
+            ("classifier", classifier),
+        ])
+        model.fit(X_train, y_train)
+        scores = model.predict_proba(X_test)[:, 1]
+        average_precision = average_precision_score(y_test, scores)
+        print(f"{name} test average precision: {average_precision:.6f}")
     print(f"Test prevalence (no-skill AP reference): {prevalence:.6f} ({prevalence:.2%})")
 
 
